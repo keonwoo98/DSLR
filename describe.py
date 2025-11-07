@@ -1,32 +1,32 @@
 #!/usr/bin/env python3
 """
-describe.py - 데이터셋의 통계 정보를 출력하는 프로그램
+describe.py - Display statistical information of the dataset
 
-pandas의 describe() 함수와 유사하게 동작:
-- Count (개수)
-- Mean (평균)
-- Std (표준편차)
-- Min (최소값)
-- 25% (1사분위수)
-- 50% (중앙값)
-- 75% (3사분위수)
-- Max (최대값)
+Similar to pandas' describe() function:
+- Count
+- Mean
+- Std (Standard Deviation)
+- Min (Minimum)
+- 25% (First Quartile)
+- 50% (Median)
+- 75% (Third Quartile)
+- Max (Maximum)
 """
 
 import sys
 
 
-# ==================== 통계 함수들 ====================
+# ==================== Statistical Functions ====================
 
 def count_values(column):
     """
-    None이 아닌 값의 개수를 세기
+    Count non-None values
 
     Args:
-        column: 숫자 리스트 (None 포함 가능)
+        column: List of numbers (may contain None)
 
     Returns:
-        int: 유효한 값의 개수
+        int: Number of valid values
     """
     count = 0
     for val in column:
@@ -37,40 +37,40 @@ def count_values(column):
 
 def calculate_mean(column):
     """
-    평균 계산
-    공식: (모든 값의 합) / (값의 개수)
+    Calculate mean (average)
+    Formula: (sum of all values) / (count of values)
 
     Args:
-        column: 숫자 리스트
+        column: List of numbers
 
     Returns:
-        float: 평균값 (값이 없으면 None)
+        float: Mean value (None if empty)
     """
-    # None이 아닌 값만 추출
+    # Extract non-None values only
     valid_values = [val for val in column if val is not None]
 
     if len(valid_values) == 0:
         return None
 
-    # 합계 구하기
+    # Calculate sum
     total = 0
     for val in valid_values:
         total += val
 
-    # 평균 = 합계 / 개수
+    # Mean = sum / count
     mean = total / len(valid_values)
     return mean
 
 
 def calculate_min(column):
     """
-    최소값 찾기
+    Find minimum value
 
     Args:
-        column: 숫자 리스트
+        column: List of numbers
 
     Returns:
-        float: 최소값
+        float: Minimum value
     """
     valid_values = [val for val in column if val is not None]
 
@@ -87,13 +87,13 @@ def calculate_min(column):
 
 def calculate_max(column):
     """
-    최대값 찾기
+    Find maximum value
 
     Args:
-        column: 숫자 리스트
+        column: List of numbers
 
     Returns:
-        float: 최대값
+        float: Maximum value
     """
     valid_values = [val for val in column if val is not None]
 
@@ -110,39 +110,39 @@ def calculate_max(column):
 
 def calculate_std(column):
     """
-    표준편차 계산
+    Calculate standard deviation
 
-    공식:
-    1. 각 값과 평균의 차이를 제곱 → (x - mean)²
-    2. 모든 제곱의 평균 → variance (분산)
-    3. 분산의 제곱근 → std (표준편차)
+    Formula:
+    1. Square the difference from mean → (x - mean)²
+    2. Average of squared differences → variance
+    3. Square root of variance → std
 
     Args:
-        column: 숫자 리스트
+        column: List of numbers
 
     Returns:
-        float: 표준편차
+        float: Standard deviation
     """
     valid_values = [val for val in column if val is not None]
 
     if len(valid_values) < 2:
         return None
 
-    # 1단계: 평균 구하기
+    # Step 1: Calculate mean
     mean = calculate_mean(column)
 
-    # 2단계: 각 값과 평균의 차이를 제곱
+    # Step 2: Square the differences from mean
     squared_diffs = []
     for val in valid_values:
         diff = val - mean
         squared_diff = diff * diff  # diff ** 2
         squared_diffs.append(squared_diff)
 
-    # 3단계: 제곱의 평균 (분산)
-    # Pandas와 동일하게 샘플 표준편차 사용 (n-1로 나눔)
+    # Step 3: Calculate variance (average of squared differences)
+    # Using sample standard deviation (divide by n-1, same as pandas)
     variance = sum(squared_diffs) / (len(squared_diffs) - 1)
 
-    # 4단계: 제곱근 (표준편차)
+    # Step 4: Square root (standard deviation)
     std = variance ** 0.5  # sqrt(variance)
 
     return std
@@ -150,35 +150,35 @@ def calculate_std(column):
 
 def calculate_percentile(column, percentile):
     """
-    백분위수 계산 (예: 25%, 50%, 75%)
+    Calculate percentile (e.g., 25%, 50%, 75%)
 
-    백분위수: 데이터를 정렬했을 때 특정 위치의 값
-    예: 25% = 하위 25% 위치의 값
+    Percentile: Value at a specific position when data is sorted
+    Example: 25% = value at the lower 25% position
 
     Args:
-        column: 숫자 리스트
-        percentile: 0~100 사이의 숫자 (예: 25, 50, 75)
+        column: List of numbers
+        percentile: Number between 0~100 (e.g., 25, 50, 75)
 
     Returns:
-        float: 백분위수 값
+        float: Percentile value
     """
     valid_values = [val for val in column if val is not None]
 
     if len(valid_values) == 0:
         return None
 
-    # 1단계: 정렬 (작은 것부터 큰 순서로)
+    # Step 1: Sort in ascending order
     sorted_values = sorted(valid_values)
 
-    # 2단계: 위치 계산
-    # 예: 100개 데이터의 25% = 25번째 위치
+    # Step 2: Calculate position
+    # Example: 25% of 100 data points = 25th position
     index = (percentile / 100) * (len(sorted_values) - 1)
 
-    # 3단계: 정수가 아니면 보간(interpolation)
+    # Step 3: Interpolate if not an integer
     if index == int(index):
         return sorted_values[int(index)]
     else:
-        # 예: 25.5번째 → 25번째와 26번째의 평균
+        # Example: 25.5th position → average of 25th and 26th
         lower_idx = int(index)
         upper_idx = lower_idx + 1
         weight = index - lower_idx
@@ -188,24 +188,24 @@ def calculate_percentile(column, percentile):
 
 def print_stats_table(feature_names, stats):
     """
-    통계를 pandas.describe()처럼 표 형태로 출력
+    Print statistics in table format like pandas.describe()
 
     Args:
-        feature_names: 컬럼명 리스트
-        stats: 통계 딕셔너리
+        feature_names: List of column names
+        stats: Statistics dictionary
     """
     print("\n" + "=" * 150)
 
-    # 헤더 출력 (첫 번째 열은 통계명)
-    header = f"{'':15}"  # 첫 열은 비워둠
+    # Print header (first column is for stat names)
+    header = f"{'':15}"  # Empty first column
     for name in feature_names:
-        # 컬럼명이 길면 줄임
+        # Shorten column name if too long
         short_name = name[:12] + '...' if len(name) > 15 else name
         header += f"{short_name:>15}"
     print(header)
     print("-" * 150)
 
-    # 각 통계 행 출력
+    # Print each statistics row
     stat_names = ['Count', 'Mean', 'Std', 'Min', '25%', '50%', '75%', 'Max']
 
     for stat_name in stat_names:
@@ -214,10 +214,10 @@ def print_stats_table(feature_names, stats):
             if value is None:
                 row += f"{'NaN':>15}"
             elif stat_name == 'Count':
-                # Count는 정수로
+                # Count as integer
                 row += f"{int(value):>15}"
             else:
-                # 나머지는 소수점 2자리
+                # Others with 2 decimal places
                 row += f"{value:>15.2f}"
         print(row)
 
@@ -226,59 +226,59 @@ def print_stats_table(feature_names, stats):
 
 def read_csv(filename):
     """
-    CSV 파일을 읽어서 2차원 리스트로 반환
+    Read CSV file and return as 2D list
 
     Args:
-        filename: CSV 파일 경로
+        filename: CSV file path
 
     Returns:
-        list: [헤더, 데이터행1, 데이터행2, ...]
+        list: [header, data_row1, data_row2, ...]
     """
     try:
         with open(filename, 'r') as f:
             lines = f.readlines()
 
-        # 각 줄을 콤마로 분리
+        # Split each line by comma
         data = []
         for line in lines:
-            # 줄바꿈 제거 후 콤마로 split
+            # Remove newline and split by comma
             row = line.strip().split(',')
             data.append(row)
 
         return data
 
     except FileNotFoundError:
-        print(f"Error: 파일을 찾을 수 없습니다: {filename}")
+        print(f"Error: File not found: {filename}")
         sys.exit(1)
     except Exception as e:
-        print(f"Error: 파일을 읽는 중 오류 발생: {e}")
+        print(f"Error: Failed to read file: {e}")
         sys.exit(1)
 
 
 def is_numeric_column(values):
     """
-    컬럼이 숫자 데이터인지 확인
+    Check if column contains numeric data
 
     Args:
-        values: 컬럼의 값들 (리스트)
+        values: List of column values
 
     Returns:
-        bool: 숫자 컬럼이면 True
+        bool: True if numeric column
     """
     numeric_count = 0
     total_count = 0
 
     for val in values:
-        if val == '' or val == 'nan':  # 빈 값이나 nan은 건너뛰기
+        if val == '' or val == 'nan':  # Skip empty or nan values
             continue
         total_count += 1
         try:
-            float(val)  # 숫자로 변환 시도
+            float(val)  # Try to convert to number
             numeric_count += 1
         except ValueError:
             pass
 
-    # 50% 이상이 숫자면 숫자 컬럼으로 판단
+    # Consider as numeric if more than 50% are numbers
     if total_count == 0:
         return False
     return (numeric_count / total_count) > 0.5
@@ -286,34 +286,34 @@ def is_numeric_column(values):
 
 def extract_numeric_columns(header, rows):
     """
-    숫자 데이터를 가진 컬럼들만 추출
+    Extract only columns with numeric data
 
     Args:
-        header: 컬럼명 리스트
-        rows: 데이터 행들
+        header: List of column names
+        rows: Data rows
 
     Returns:
-        tuple: (숫자 컬럼명 리스트, 숫자 데이터 2차원 리스트)
+        tuple: (list of numeric column names, 2D list of numeric data)
     """
     numeric_cols = []
     numeric_indices = []
 
-    # 각 컬럼을 확인해서 숫자 컬럼 찾기
+    # Check each column for numeric data
     for col_idx in range(len(header)):
-        # 해당 컬럼의 모든 값들 추출
+        # Extract all values from this column
         column_values = [row[col_idx] for row in rows]
 
         if is_numeric_column(column_values):
             numeric_cols.append(header[col_idx])
             numeric_indices.append(col_idx)
 
-    # 숫자 데이터만 추출
+    # Extract numeric data only
     numeric_data = []
     for col_idx in numeric_indices:
         column = []
         for row in rows:
             val = row[col_idx]
-            # 빈 값이나 빈 문자열은 None으로 처리
+            # Treat empty or empty string as None
             if val == '' or val == 'nan':
                 column.append(None)
             else:
@@ -327,38 +327,38 @@ def extract_numeric_columns(header, rows):
 
 
 def main():
-    # 사용법 확인
+    # Check usage
     if len(sys.argv) != 2:
         print("Usage: python describe.py <dataset.csv>")
         sys.exit(1)
 
     filename = sys.argv[1]
 
-    # 1단계: 파일 읽기
-    print(f"📂 파일 읽는 중: {filename}")
+    # Step 1: Read file
+    print(f"Reading file: {filename}")
     data = read_csv(filename)
 
-    # 헤더와 데이터 분리
+    # Separate header and data
     header = data[0]
     rows = data[1:]
 
-    print(f"✅ 총 {len(rows)}개 행, {len(header)}개 열 읽음")
+    print(f"Total {len(rows)} rows, {len(header)} columns")
 
-    # 2단계: 숫자 컬럼만 추출
-    print(f"\n🔢 숫자 컬럼 추출 중...")
+    # Step 2: Extract numeric columns only
+    print(f"\nExtracting numeric columns...")
     numeric_cols, numeric_data = extract_numeric_columns(header, rows)
 
-    print(f"✅ {len(numeric_cols)}개 숫자 컬럼 발견:")
+    print(f"Found {len(numeric_cols)} numeric columns:")
     for col_name in numeric_cols:
         print(f"   - {col_name}")
 
-    # 3단계: 각 컬럼의 통계 계산
-    print(f"\n📊 통계 계산 중...")
+    # Step 3: Calculate statistics for each column
+    print(f"\nCalculating statistics...")
 
-    # Index 컬럼은 제외 (의미 없는 숫자)
+    # Exclude Index column (meaningless number)
     start_idx = 1 if numeric_cols[0] == 'Index' else 0
 
-    # 모든 컬럼의 통계 저장
+    # Store statistics for all columns
     stats = {
         'Count': [],
         'Mean': [],
@@ -370,7 +370,7 @@ def main():
         'Max': []
     }
 
-    # 각 컬럼별로 통계 계산
+    # Calculate statistics for each column
     feature_names = []
     for idx in range(start_idx, len(numeric_cols)):
         col = numeric_data[idx]
@@ -386,7 +386,7 @@ def main():
         stats['75%'].append(calculate_percentile(col, 75))
         stats['Max'].append(calculate_max(col))
 
-    # 4단계: 예쁜 표로 출력
+    # Step 4: Print results in table format
     print_stats_table(feature_names, stats)
 
 
