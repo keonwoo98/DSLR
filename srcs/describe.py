@@ -3,14 +3,12 @@
 describe.py - Display statistical information of the dataset
 
 Similar to pandas' describe() function:
-- Count
-- Mean
-- Std (Standard Deviation)
-- Min (Minimum)
-- 25% (First Quartile)
-- 50% (Median)
-- 75% (Third Quartile)
-- Max (Maximum)
+
+Basic (Mandatory):
+- Count, Mean, Std, Min, 25%, 50%, 75%, Max
+
+BONUS (Optional - for extra credit):
+- Median, Mode, Range, IQR, Variance, Skewness, Kurtosis
 """
 
 import sys
@@ -186,6 +184,104 @@ def calculate_percentile(column, percentile):
         return sorted_values[lower_idx] * (1 - weight) + sorted_values[upper_idx] * weight
 
 
+# ==================== BONUS: Additional Statistical Functions ====================
+
+def calculate_median(column):
+    """Calculate median (50th percentile) - Middle value when data is sorted"""
+    return calculate_percentile(column, 50)
+
+
+def calculate_mode(column):
+    """Calculate mode (most frequent value)"""
+    valid_values = [val for val in column if val is not None]
+    if len(valid_values) == 0:
+        return None
+
+    # Count frequency
+    frequency = {}
+    for val in valid_values:
+        rounded_val = round(val, 2)
+        frequency[rounded_val] = frequency.get(rounded_val, 0) + 1
+
+    # Find max frequency
+    max_freq = max(frequency.values())
+    modes = [val for val, freq in frequency.items() if freq == max_freq]
+
+    # If all values appear equally, no mode
+    if len(modes) == len(frequency):
+        return None
+    return modes[0]
+
+
+def calculate_range(column):
+    """Calculate range (Max - Min)"""
+    min_val = calculate_min(column)
+    max_val = calculate_max(column)
+    if min_val is None or max_val is None:
+        return None
+    return max_val - min_val
+
+
+def calculate_iqr(column):
+    """Calculate IQR (Interquartile Range): Q3 - Q1"""
+    q1 = calculate_percentile(column, 25)
+    q3 = calculate_percentile(column, 75)
+    if q1 is None or q3 is None:
+        return None
+    return q3 - q1
+
+
+def calculate_variance(column):
+    """Calculate variance (Std²)"""
+    std = calculate_std(column)
+    if std is None:
+        return None
+    return std ** 2
+
+
+def calculate_skewness(column):
+    """
+    Calculate skewness (measure of asymmetry)
+    - Skewness = 0: Symmetric
+    - Skewness > 0: Right-skewed (tail on right)
+    - Skewness < 0: Left-skewed (tail on left)
+    """
+    valid_values = [val for val in column if val is not None]
+    if len(valid_values) < 3:
+        return None
+
+    mean = calculate_mean(column)
+    std = calculate_std(column)
+    if std == 0:
+        return None
+
+    n = len(valid_values)
+    sum_cubed = sum(((val - mean) / std) ** 3 for val in valid_values)
+    return sum_cubed / n
+
+
+def calculate_kurtosis(column):
+    """
+    Calculate kurtosis (measure of tailedness)
+    - Kurtosis = 0: Normal distribution
+    - Kurtosis > 0: Heavy tails
+    - Kurtosis < 0: Light tails
+    """
+    valid_values = [val for val in column if val is not None]
+    if len(valid_values) < 4:
+        return None
+
+    mean = calculate_mean(column)
+    std = calculate_std(column)
+    if std == 0:
+        return None
+
+    n = len(valid_values)
+    sum_fourth = sum(((val - mean) / std) ** 4 for val in valid_values)
+    # Excess kurtosis (subtract 3 for normal distribution baseline)
+    return (sum_fourth / n) - 3
+
+
 def print_stats_table(feature_names, stats):
     """
     Print statistics in table format like pandas.describe()
@@ -205,8 +301,9 @@ def print_stats_table(feature_names, stats):
     print(header)
     print("-" * 150)
 
-    # Print each statistics row
-    stat_names = ['Count', 'Mean', 'Std', 'Min', '25%', '50%', '75%', 'Max']
+    # Print each statistics row (BONUS: Extended)
+    stat_names = ['Count', 'Mean', 'Std', 'Min', '25%', '50%', '75%', 'Max',
+                  'Median', 'Mode', 'Range', 'IQR', 'Variance', 'Skewness', 'Kurtosis']
 
     for stat_name in stat_names:
         row = f"{stat_name:15}"
@@ -358,7 +455,7 @@ def main():
     # Exclude Index column (meaningless number)
     start_idx = 1 if numeric_cols[0] == 'Index' else 0
 
-    # Store statistics for all columns
+    # Store statistics for all columns (BONUS: Extended)
     stats = {
         'Count': [],
         'Mean': [],
@@ -367,7 +464,14 @@ def main():
         '25%': [],
         '50%': [],
         '75%': [],
-        'Max': []
+        'Max': [],
+        'Median': [],      # BONUS
+        'Mode': [],        # BONUS
+        'Range': [],       # BONUS
+        'IQR': [],         # BONUS
+        'Variance': [],    # BONUS
+        'Skewness': [],    # BONUS
+        'Kurtosis': []     # BONUS
     }
 
     # Calculate statistics for each column
@@ -377,6 +481,7 @@ def main():
         col_name = numeric_cols[idx]
         feature_names.append(col_name)
 
+        # Basic statistics
         stats['Count'].append(count_values(col))
         stats['Mean'].append(calculate_mean(col))
         stats['Std'].append(calculate_std(col))
@@ -385,6 +490,15 @@ def main():
         stats['50%'].append(calculate_percentile(col, 50))
         stats['75%'].append(calculate_percentile(col, 75))
         stats['Max'].append(calculate_max(col))
+
+        # BONUS: Additional statistics
+        stats['Median'].append(calculate_median(col))
+        stats['Mode'].append(calculate_mode(col))
+        stats['Range'].append(calculate_range(col))
+        stats['IQR'].append(calculate_iqr(col))
+        stats['Variance'].append(calculate_variance(col))
+        stats['Skewness'].append(calculate_skewness(col))
+        stats['Kurtosis'].append(calculate_kurtosis(col))
 
     # Step 4: Print results in table format
     print_stats_table(feature_names, stats)
