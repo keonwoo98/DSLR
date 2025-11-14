@@ -13,7 +13,7 @@ DSLR/
 │   ├── dataset_train.csv        # 1600 students with labels
 │   └── dataset_test.csv         # 400 students without labels
 │
-├── mandatory/                    # Required implementations (includes BONUS features)
+├── scrs/                    # Required implementations (includes BONUS features)
 │   ├── describe.py              # Statistical analysis (8 basic + 7 BONUS metrics)
 │   ├── histogram.py             # Score distribution visualization
 │   ├── scatter_plot.py          # Correlation analysis
@@ -28,11 +28,11 @@ DSLR/
 
 ## 🚀 Usage
 
-### Basic Usage (Mandatory)
+### Basic Usage (scrs)
 
 #### 1. Data Analysis
 ```bash
-cd mandatory/
+cd scrs/
 
 # Statistical summary (shows all 15 metrics including BONUS)
 python describe.py ../datasets/dataset_train.csv
@@ -66,27 +66,27 @@ The `describe.py` file includes **7 additional statistical metrics**:
 
 All automatically calculated when running:
 ```bash
-python mandatory/describe.py datasets/dataset_train.csv
+python scrs/describe.py datasets/dataset_train.csv
 ```
 
 #### BONUS 2 & 3: Multiple Gradient Descent Methods (in logreg_train.py)
 The `logreg_train.py` file supports **3 optimization methods**:
 
 ```bash
-# Default: Stochastic Gradient Descent (mandatory)
-python mandatory/logreg_train.py datasets/dataset_train.csv
+# Default: Stochastic Gradient Descent (scrs)
+python scrs/logreg_train.py datasets/dataset_train.csv
 
 # BONUS: Batch Gradient Descent
-python mandatory/logreg_train.py datasets/dataset_train.csv --method batch
+python scrs/logreg_train.py datasets/dataset_train.csv --method batch
 
 # BONUS: Mini-batch Gradient Descent
-python mandatory/logreg_train.py datasets/dataset_train.csv --method minibatch --batch-size 32
+python scrs/logreg_train.py datasets/dataset_train.csv --method minibatch --batch-size 32
 ```
 
 **Performance Comparison:**
 | Method | Description | Training Time | Accuracy |
 |--------|-------------|---------------|----------|
-| **SGD** | Updates per sample (mandatory) | 3.52s | 98.32% |
+| **SGD** | Updates per sample (scrs) | 3.52s | 98.32% |
 | **Batch GD** | Updates per epoch (BONUS) | 3.10s ⚡ | 98.32% |
 | **Mini-batch GD** | Updates per batch (BONUS) | 3.18s | 98.32% |
 
@@ -95,7 +95,7 @@ python mandatory/logreg_train.py datasets/dataset_train.csv --method minibatch -
 ### Phase 1-4: Data Analysis & Visualization
 
 **describe.py**: Statistical analysis from scratch
-- **Basic (Mandatory)**: Count, Mean, Std, Min, 25%, 50%, 75%, Max
+- **Basic (scrs)**: Count, Mean, Std, Min, 25%, 50%, 75%, Max
 - **BONUS**: Median, Mode, Range, IQR, Variance, Skewness, Kurtosis
 
 **histogram.py**: Distribution analysis
@@ -116,7 +116,7 @@ python mandatory/logreg_train.py datasets/dataset_train.csv --method minibatch -
 
 **logreg_train.py**: Model training
 - One-vs-All multi-class strategy
-- **Mandatory**: SGD (Stochastic Gradient Descent)
+- **scrs**: SGD (Stochastic Gradient Descent)
 - **BONUS**: Batch GD and Mini-batch GD
 - Normalization and weight export
 
@@ -128,8 +128,8 @@ python mandatory/logreg_train.py datasets/dataset_train.csv --method minibatch -
 ## 🎯 Key Concepts
 
 ### Statistics (BONUS 1)
-- **Mean/Std/Min/Max**: Basic statistics (mandatory)
-- **Percentiles**: 25%, 50%, 75% (mandatory)
+- **Mean/Std/Min/Max**: Basic statistics (scrs)
+- **Percentiles**: 25%, 50%, 75% (scrs)
 - **Median**: Middle value = 50th percentile (BONUS)
 - **Mode**: Most frequent value (BONUS)
 - **Range**: Spread of data (BONUS)
@@ -140,7 +140,7 @@ python mandatory/logreg_train.py datasets/dataset_train.csv --method minibatch -
 
 ### Gradient Descent Variants (BONUS 2 & 3)
 
-**Stochastic Gradient Descent (SGD)** - Mandatory
+**Stochastic Gradient Descent (SGD)** - scrs
 - Updates weights after **each sample**
 - Fast, escapes local minima
 - High variance, noisy convergence
@@ -165,7 +165,7 @@ python mandatory/logreg_train.py datasets/dataset_train.csv --method minibatch -
 
 ### How BONUS Features are Organized
 
-All BONUS features are integrated into the mandatory files with clear markers:
+All BONUS features are integrated into the scrs files with clear markers:
 
 **In describe.py:**
 ```python
@@ -210,21 +210,21 @@ This approach:
 
 ## 📚 Summary
 
-**Mandatory Features (All Implemented):**
+**scrs Features (All Implemented):**
 - ✅ Phase 1-4: Data analysis and visualization
 - ✅ Phase 5-6: Logistic regression with SGD
 
 **BONUS Features (All Implemented):**
 - 🌟 **BONUS 1**: 7 additional statistics in describe.py
-- 🌟 **BONUS 2**: Stochastic GD (already implemented as mandatory)
+- 🌟 **BONUS 2**: Stochastic GD (already implemented as scrs)
 - 🌟 **BONUS 3**: Batch GD + Mini-batch GD in logreg_train.py
 
 **Total Statistics**: 15 metrics (8 basic + 7 BONUS)
-**Total GD Methods**: 3 variants (SGD mandatory + 2 BONUS)
+**Total GD Methods**: 3 variants (SGD scrs + 2 BONUS)
 
 ---
 
 **Author**: 42 School DSLR Project
 **Date**: November 2024
-**Status**: All mandatory + all bonus features implemented ✅
+**Status**: All scrs + all bonus features implemented ✅
 **Implementation**: Pure Python (no numpy, pandas, scikit-learn)
