@@ -26,6 +26,7 @@ Goal: Train a logistic regression classifier to predict Hogwarts house
 
 import sys
 import math
+import json
 
 
 # ==================== Utility Functions (from describe.py) ====================
@@ -539,17 +540,24 @@ def calculate_accuracy(features, labels, all_weights, houses):
     return accuracy
 
 
-def save_weights(all_weights, means, stds, feature_names, houses, filename='weights.csv'):
+def save_weights(all_weights, means, stds, feature_names, houses, filename='weights.json'):
     """
-    Save trained weights to CSV file
+    Save trained weights to JSON file
 
     Format:
-    house,bias,feature1_weight,feature2_weight,...
-    Gryffindor,0.5,0.3,-0.2,...
-    Hufflepuff,-0.3,0.1,0.4,...
-    ...
-
-    Also save normalization parameters (means, stds)
+    {
+        "feature_names": ["Arithmancy", "Astronomy", ...],
+        "houses": ["Gryffindor", "Hufflepuff", ...],
+        "weights": {
+            "Gryffindor": [bias, w1, w2, ...],
+            "Hufflepuff": [bias, w1, w2, ...],
+            ...
+        },
+        "normalization": {
+            "means": [mean1, mean2, ...],
+            "stds": [std1, std2, ...]
+        }
+    }
 
     Args:
         all_weights: Dictionary {house: weights}
@@ -561,21 +569,18 @@ def save_weights(all_weights, means, stds, feature_names, houses, filename='weig
     """
     print(f"\nSaving weights to {filename}...")
 
+    data = {
+        "feature_names": feature_names,
+        "houses": houses,
+        "weights": all_weights,
+        "normalization": {
+            "means": means,
+            "stds": stds
+        }
+    }
+
     with open(filename, 'w') as f:
-        # Header
-        header = 'house,bias,' + ','.join(feature_names)
-        f.write(header + '\n')
-
-        # Weights for each house
-        for house in houses:
-            weights = all_weights[house]
-            line = house + ',' + ','.join(str(w) for w in weights)
-            f.write(line + '\n')
-
-        # Save normalization parameters
-        f.write('\n# Normalization parameters\n')
-        f.write('means,' + ','.join(str(m) for m in means) + '\n')
-        f.write('stds,' + ','.join(str(s) for s in stds) + '\n')
+        json.dump(data, f, indent=2)
 
     print(f"✓ Weights saved to {filename}")
 

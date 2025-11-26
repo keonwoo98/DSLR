@@ -16,23 +16,29 @@ Goal: Use trained model to predict houses for new students
 
 import sys
 import math
+import json
 
 # Reuse functions from previous scripts
 from describe import read_csv, extract_numeric_columns
 
 
-def load_weights(filename='weights.csv'):
+def load_weights(filename='weights.json'):
     """
-    Load trained weights from CSV file
+    Load trained weights from JSON file
 
     File format:
-    house,bias,feature1_weight,feature2_weight,...
-    Gryffindor,0.5,0.3,-0.2,...
-    ...
-
-    # Normalization parameters
-    means,mean1,mean2,...
-    stds,std1,std2,...
+    {
+        "feature_names": ["Arithmancy", "Astronomy", ...],
+        "houses": ["Gryffindor", "Hufflepuff", ...],
+        "weights": {
+            "Gryffindor": [bias, w1, w2, ...],
+            ...
+        },
+        "normalization": {
+            "means": [mean1, mean2, ...],
+            "stds": [std1, std2, ...]
+        }
+    }
 
     Args:
         filename: Path to weights file
@@ -48,49 +54,13 @@ def load_weights(filename='weights.csv'):
     print(f"Loading weights from {filename}...")
 
     with open(filename, 'r') as f:
-        lines = f.readlines()
+        data = json.load(f)
 
-    # Parse header (feature names)
-    header = lines[0].strip().split(',')
-    feature_names = header[2:]  # Skip 'house' and 'bias'
-
-    # Parse weights for each house
-    all_weights = {}
-    houses = []
-    line_idx = 1
-
-    while line_idx < len(lines):
-        line = lines[line_idx].strip()
-
-        # Stop at normalization parameters section
-        if line.startswith('#') or line.startswith('means'):
-            break
-
-        if line:  # Skip empty lines
-            parts = line.split(',')
-            house = parts[0]
-            weights = [float(w) for w in parts[1:]]  # bias + feature weights
-
-            all_weights[house] = weights
-            houses.append(house)
-
-        line_idx += 1
-
-    # Find and parse normalization parameters
-    means = None
-    stds = None
-
-    for i in range(line_idx, len(lines)):
-        line = lines[i].strip()
-
-        if line.startswith('means,'):
-            means = [float(m) for m in line.split(',')[1:]]
-        elif line.startswith('stds,'):
-            stds = [float(s) for s in line.split(',')[1:]]
-
-    if means is None or stds is None:
-        print("Error: Could not find normalization parameters in weights file")
-        sys.exit(1)
+    feature_names = data["feature_names"]
+    houses = data["houses"]
+    all_weights = data["weights"]
+    means = data["normalization"]["means"]
+    stds = data["normalization"]["stds"]
 
     print(f"✓ Loaded weights for {len(houses)} houses")
     print(f"✓ Features: {len(feature_names)} subjects")
